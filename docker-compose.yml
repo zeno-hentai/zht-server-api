@@ -5,6 +5,7 @@ services:
     working_dir: '/project'
     volumes:
       - '.:/project'
+      - '.docker/gradle-cache:/root/.gradle'
     command: ['./gradlew', '--info', build]
   api:
     image: openjdk:12-jdk-alpine
@@ -12,5 +13,5 @@ services:
     volumes:
       - '.:/project'
     environment:
-      debug.test.property: 'Launched from docker'
+      'debug.test.property': 'Launched from docker'
     command: [java, '-jar', './build/libs/zht-server-api-0.0.1-all.jar']
