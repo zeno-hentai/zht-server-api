@@ -5,5 +5,7 @@ import io.ktor.response.respond
 
 data class ZhtApiResponse<T>(val data: T)
 
+suspend fun ApplicationCall.apiRespond() = apiRespond(Unit)
+
 suspend fun <T> ApplicationCall.apiRespond(data: T) =
     respond(ZhtApiResponse(data))

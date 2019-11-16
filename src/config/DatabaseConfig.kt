@@ -1,9 +1,6 @@
 package config
 
-import model.APIToken
-import model.FileLink
-import model.ItemIndex
-import model.User
+import model.*
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -13,6 +10,6 @@ fun connectDatabase() {
 }
 
 fun createDatabaseTables() = transaction {
-    SchemaUtils.create(User, FileLink, ItemIndex, APIToken)
+    SchemaUtils.create(User, FileLink, ItemIndex, APIToken, ItemTag, UserLatestUpdate)
     commit()
 }

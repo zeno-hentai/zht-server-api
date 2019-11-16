@@ -61,3 +61,7 @@ fun getUserInfoByUserId(userId: Long): UserInformationResponse = transaction {
         encryptedPrivateKey = result[User.encryptedPrivateKey]
     )
 }
+
+fun deleteUserData(userId: Long) = transaction {
+    User.deleteWhere { User.id eq userId }
+}

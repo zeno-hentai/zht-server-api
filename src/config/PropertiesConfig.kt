@@ -12,7 +12,7 @@ class ZHTApiProperties(private val config: Configuration) {
         getProperty(name, propertyType)
     }
 
-    val apiPort by lazyPropertyByName("api.port", intType)
+    val debugTestProperty by lazyPropertyByName("debug.test.property", stringType)
     val apiAdminSecret by lazyPropertyByName("api.admin.secret", stringType)
     val dbUrl by lazyPropertyByName("db.url", stringType)
     val dbDriver by lazyPropertyByName("db.driver", stringType)

@@ -45,8 +45,8 @@ fun unpackResourceFile(userId: Long, inputStream: InputStream){
         PackagedFileLink(idx, name)
     }
     addPackagedFileIndex(
-        encryptedKey = meta.encryptedKey ?: zError("missing encryptedKey"),
-        encryptedMeta = meta.encryptedMeta ?: zError("missing encryptedMeta"),
+        encryptedKey = meta.encryptedKey,
+        encryptedMeta = meta.encryptedMeta,
         files = fileList,
         userId = userId
     )

@@ -2,12 +2,14 @@ buildscript {
     repositories {
         jcenter()
     }
-    
+
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.4'
     }
 }
 
+apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'kotlin'
 apply plugin: 'application'
 
@@ -63,24 +65,8 @@ task integrationTest(type: Test) {
 
 }
 
-task buildApiJar(type: Jar) {
+shadowJar {
     manifest {
-        attributes 'Implementation-Title': 'ZHT Server API',
-                'Implementation-Version': version,
-                'Main-Class': 'ApplicationKt'
+        attributes 'Main-Class': 'io.ktor.server.netty.EngineMain'
     }
-    baseName = project.name + '-server'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-}
-
-task buildInitJar(type: Jar) {
-    manifest {
-        attributes 'Implementation-Title': 'ZHT Initializer',
-                'Implementation-Version': version,
-                'Main-Class': 'ZhtInitializerKt'
-    }
-    baseName = project.name + '-initialize'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
 }

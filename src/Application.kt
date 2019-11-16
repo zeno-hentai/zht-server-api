@@ -19,6 +19,7 @@ import io.ktor.sessions.cookie
 import org.slf4j.event.Level
 import utils.api.ZHTSession
 import utils.ZhtApiException
+import java.text.DateFormat
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -44,6 +45,7 @@ fun Application.module(testing: Boolean = false) {
 
     install(ContentNegotiation) {
         gson {
+            setDateFormat(DateFormat.LONG)
         }
     }
 
@@ -64,6 +66,7 @@ fun Application.module(testing: Boolean = false) {
     if(ZHTConfig.dbCreateTables){
         createDatabaseTables()
     }
+    log.info("Debug Message: ${ZHTConfig.debugTestProperty}")
 
     routing {
 

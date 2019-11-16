@@ -4,9 +4,12 @@ import config.ZHTConfig
 import data.http.auth.LoginRequest
 import data.http.auth.MasterKeyRequest
 import data.http.auth.RegisterRequest
+import facade.deleteUser
 import io.ktor.application.call
 import io.ktor.request.receive
+import io.ktor.response.respond
 import io.ktor.routing.Route
+import io.ktor.routing.delete
 import io.ktor.routing.post
 import io.ktor.sessions.clear
 import io.ktor.sessions.sessions
@@ -16,6 +19,7 @@ import io.ktor.sessions.set
 import service.createUser
 import service.getUserInfoByUserId
 import utils.api.apiRespond
+import utils.api.userId
 import utils.zError
 
 fun MasterKeyRequest.checkMasterKey () {
@@ -53,5 +57,11 @@ fun Route.authRouting(){
     post("logout"){
         call.sessions.clear<ZHTSession>()
         call.apiRespond("success")
+    }
+
+    delete("delete/{userId}") {
+        val userId = call.userId ?: zError("Unauthorized")
+        deleteUser(userId)
+        call.apiRespond(Unit)
     }
 }

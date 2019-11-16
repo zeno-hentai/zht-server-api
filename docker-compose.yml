@@ -1,0 +1,16 @@
+version: '3'
+services:
+  build:
+    image: openjdk:12-jdk-alpine
+    working_dir: '/project'
+    volumes:
+      - '.:/project'
+    command: ['./gradlew', '--info', build]
+  api:
+    image: openjdk:12-jdk-alpine
+    working_dir: '/project'
+    volumes:
+      - '.:/project'
+    environment:
+      debug.test.property: 'Launched from docker'
+    command: [java, '-jar', './build/libs/zht-server-api-0.0.1-all.jar']

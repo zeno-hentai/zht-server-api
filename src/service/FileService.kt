@@ -34,5 +34,6 @@ fun addPackagedFileIndex(
             it[FileLink.itemIndexId] = itemId
         }
     }
+    updateLatestUpdateTime(userId)
     itemId
 }

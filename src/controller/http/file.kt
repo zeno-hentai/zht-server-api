@@ -16,29 +16,7 @@ import service.getUserPublicKey
 import utils.api.authorizedUserId
 import utils.zError
 
-private fun ApplicationCall.userIdFromToken(): Long {
-    val token = request.headers["ZHT-API-TOKEN"] ?: zError("Missing header: ZHT-API-TOKEN")
-    return getUserIdByAPIToken(token) ?: zError("Unknown token.")
-}
-
 fun Route.fileRouting(){
-    /**
-     * POST /api/file/user/public-key
-     */
-    post("user/public-key") {
-        val userId = call.userIdFromToken()
-        call.respond(getUserPublicKey(userId))
-    }
-
-    /**
-     * POST /api/file/item/upload
-     */
-    post("item/upload") {
-        val userId = call.userIdFromToken()
-        val stream = call.receiveStream()
-        unpackResourceFile(userId, stream)
-    }
-
     /**
      * GET /api/file/data/{name}
      */

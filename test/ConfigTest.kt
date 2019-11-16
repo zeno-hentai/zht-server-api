@@ -15,7 +15,6 @@ class ConfigTest {
     fun testConfigDebug(){
         assertEquals("jdbc:sqlite::memory:", ZHTConfig.dbUrl)
         assertEquals("org.sqlite.JDBC", ZHTConfig.dbDriver)
-        assertEquals(11451, ZHTConfig.apiPort)
     }
 
     @Test
