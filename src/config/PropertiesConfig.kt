@@ -1,6 +1,7 @@
 package config
 
 import com.natpryce.konfig.*
+import java.io.File
 
 
 class ZHTApiProperties(private val config: Configuration) {
@@ -24,8 +25,13 @@ class ZHTApiProperties(private val config: Configuration) {
 
 val ZHTConfig: ZHTApiProperties by lazy {
     val env = System.getProperty("ZHT_ENV") ?: "default"
-    val config = ConfigurationProperties.systemProperties() overriding
-            EnvironmentVariables() overriding
-            ConfigurationProperties.fromResource("config/$env.properties")
+    val configFile: String? = System.getenv("ZHT_CONFIG")
+    var config: Configuration = ConfigurationProperties.systemProperties() overriding
+            EnvironmentVariables()
+    if(configFile != null){
+        println("Usuing config file: $configFile")
+        config = config overriding ConfigurationProperties.fromFile(File(configFile))
+    }
+    config = config overriding ConfigurationProperties.fromResource("config/$env.properties")
     ZHTApiProperties(config)
 }

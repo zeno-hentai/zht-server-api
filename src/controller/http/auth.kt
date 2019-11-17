@@ -19,6 +19,7 @@ import io.ktor.sessions.set
 import service.createUser
 import service.getUserInfoByUserId
 import utils.api.apiRespond
+import utils.api.authorizedUserId
 import utils.api.userId
 import utils.zError
 
@@ -46,7 +47,7 @@ fun Route.authRouting(){
         val request = call.receive<LoginRequest>()
         val userId = authorizeUser(
             username = request.username,
-            password = request.username
+            password = request.password
         )
         call.sessions.set(ZHTSession(
             userId = userId
@@ -54,14 +55,15 @@ fun Route.authRouting(){
         call.apiRespond(getUserInfoByUserId(userId))
     }
 
-    post("logout"){
+    delete("logout"){
         call.sessions.clear<ZHTSession>()
         call.apiRespond("success")
     }
 
-    delete("delete/{userId}") {
-        val userId = call.userId ?: zError("Unauthorized")
+    delete("delete") {
+        val userId = call.authorizedUserId
         deleteUser(userId)
-        call.apiRespond(Unit)
+        call.sessions.clear<ZHTSession>()
+        call.apiRespond("success")
     }
 }

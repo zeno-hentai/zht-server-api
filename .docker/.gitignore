@@ -1,1 +1,4 @@
 gradle-cache/*
+config/*.properties
+!config/*.example.properties
+postgres-data/*

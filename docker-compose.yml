@@ -13,5 +13,17 @@ services:
     volumes:
       - '.:/project'
     environment:
-      'debug.test.property': 'Launched from docker'
-    command: [java, '-jar', './build/libs/zht-server-api-0.0.1-all.jar']
+      ZHT_CONFIG: .docker/config/config.properties
+    depends_on:
+      - db
+    command: [sh, './.docker/scripts/launch.sh']
+  db:
+    image: postgres:12-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: zht
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: zht
+      PGDATA: /data
+    volumes:
+      - '.docker/postgres-data:/data'
