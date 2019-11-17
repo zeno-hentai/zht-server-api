@@ -3,23 +3,31 @@ import config.ZHTConfig
 import config.connectDatabase
 import config.createDatabaseTables
 import controller.routingRoot
-import io.ktor.application.*
-import io.ktor.response.*
-import io.ktor.features.*
-import io.ktor.routing.*
-import io.ktor.http.*
-import io.ktor.websocket.*
-import io.ktor.http.cio.websocket.*
-import java.time.*
-import io.ktor.auth.*
-import io.ktor.gson.*
+import io.ktor.application.Application
+import io.ktor.application.call
+import io.ktor.application.install
+import io.ktor.application.log
+import io.ktor.auth.Authentication
+import io.ktor.features.CallLogging
+import io.ktor.features.ContentNegotiation
+import io.ktor.features.DataConversion
+import io.ktor.features.StatusPages
+import io.ktor.gson.gson
+import io.ktor.http.ContentType
 import io.ktor.http.cio.websocket.Frame
+import io.ktor.http.cio.websocket.readText
+import io.ktor.response.respond
+import io.ktor.response.respondText
+import io.ktor.routing.get
+import io.ktor.routing.routing
 import io.ktor.sessions.Sessions
 import io.ktor.sessions.cookie
+import io.ktor.websocket.webSocket
 import org.slf4j.event.Level
-import utils.api.ZHTSession
 import utils.ZhtApiException
+import utils.api.ZHTSession
 import java.text.DateFormat
+import java.time.Duration
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 

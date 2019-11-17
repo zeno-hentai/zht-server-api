@@ -3,10 +3,11 @@ package service
 import config.ZHTConfig
 import data.http.user.UserInformationResponse
 import model.APIToken
-import model.FileLink
-import model.ItemIndex
 import model.User
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.security.crypto.bcrypt.BCrypt
 import utils.maxValue

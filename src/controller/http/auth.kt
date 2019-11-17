@@ -7,20 +7,18 @@ import data.http.auth.RegisterRequest
 import facade.deleteUser
 import io.ktor.application.call
 import io.ktor.request.receive
-import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.delete
 import io.ktor.routing.post
 import io.ktor.sessions.clear
 import io.ktor.sessions.sessions
-import service.authorizeUser
-import utils.api.ZHTSession
 import io.ktor.sessions.set
+import service.authorizeUser
 import service.createUser
 import service.getUserInfoByUserId
+import utils.api.ZHTSession
 import utils.api.apiRespond
 import utils.api.authorizedUserId
-import utils.api.userId
 import utils.zError
 
 fun MasterKeyRequest.checkMasterKey () {

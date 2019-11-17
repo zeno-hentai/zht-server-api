@@ -52,7 +52,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.springframework.security/spring-security-crypto
     compile "org.springframework.security:spring-security-crypto:5.2.1.RELEASE"
 
-    compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.28.0'
+//    compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.28.0'
 
 
     testCompile "io.ktor:ktor-server-tests:$ktor_version"

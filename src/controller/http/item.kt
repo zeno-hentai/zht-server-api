@@ -1,10 +1,10 @@
 package controller.http
 
+import data.http.file.UploadResponse
 import data.http.item.AddItemTagRequest
 import facade.deleteItem
 import io.ktor.application.call
 import io.ktor.request.receive
-import io.ktor.response.respond
 import io.ktor.routing.*
 import service.*
 import utils.api.apiRespond
@@ -34,7 +34,7 @@ fun Route.itemRouting() {
     delete("delete/{itemId}") {
         val itemId = call.parameters["itemId"]?.toLong() ?: zError("missing itemId")
         deleteItem(call.authorizedUserId, itemId)
-        call.apiRespond(Unit)
+        call.apiRespond(UploadResponse(itemId))
     }
 
     route("tag") {

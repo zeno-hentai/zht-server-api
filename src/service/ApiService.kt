@@ -4,16 +4,17 @@ import data.http.api.GenerateAPITokenResponse
 import data.http.api.QueryAPITokenResponse
 import model.APIToken
 import model.User
-import org.jetbrains.exposed.sql.SortOrder
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import utils.maxValue
 import utils.zError
 
 fun addApiToken(userId: Long, title: String, token: String) = transaction {
-
+    APIToken.insert {
+        it[APIToken.userId] = userId
+        it[APIToken.title] = title
+        it[APIToken.token] = token
+    }
     val tokenId = APIToken.maxValue(APIToken.id) ?: zError("failed to create item")
     GenerateAPITokenResponse(
         id = tokenId,

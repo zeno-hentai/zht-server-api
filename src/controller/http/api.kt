@@ -1,13 +1,13 @@
 package controller.http
 
 import data.http.api.GenerateAPITokenRequest
+import data.http.file.UploadResponse
 import facade.createAPIToken
 import facade.unpackResourceFile
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.request.receive
 import io.ktor.request.receiveStream
-import io.ktor.response.respond
 import io.ktor.routing.*
 import service.deleteApiToken
 import service.getUserIdByAPIToken
@@ -43,17 +43,18 @@ fun Route.apiRouting(){
     /**
      * POST /api/file/user/public-key
      */
-    post("user/public-key") {
+    get("public-key") {
         val userId = call.userIdFromToken()
         call.apiRespond(getUserPublicKey(userId))
     }
 
     /**
-     * POST /api/file/item/upload
+     * POST /api/api/upload
      */
-    post("item/upload") {
+    post("upload") {
         val userId = call.userIdFromToken()
         val stream = call.receiveStream()
-        unpackResourceFile(userId, stream)
+        val itemId = unpackResourceFile(userId, stream)
+        call.apiRespond(UploadResponse(itemId))
     }
 }

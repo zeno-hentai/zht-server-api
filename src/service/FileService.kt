@@ -3,6 +3,7 @@ package service
 import data.http.file.PackagedFileLink
 import model.FileLink
 import model.ItemIndex
+import model.ItemTag
 import model.User
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -18,6 +19,8 @@ fun authorizeFile(userId: Long, name: String): Boolean = transaction {
 fun addPackagedFileIndex(
     encryptedMeta: String,
     encryptedKey: String,
+    encryptedTags: List<String>,
+    previewFile: String,
     files: List<PackagedFileLink>,
     userId: Long
 ): Long = transaction {
@@ -25,15 +28,31 @@ fun addPackagedFileIndex(
         it[ItemIndex.ownerId] = userId
         it[ItemIndex.encryptedKey] = encryptedKey
         it[ItemIndex.encryptedMeta] = encryptedMeta
+        it[ItemIndex.previewFile] = previewFile
     }
     val itemId = ItemIndex.maxValue(ItemIndex.id) ?: zError("failed to add file")
-    files.forEach {fp ->
-        FileLink.insert {
-            it[FileLink.fileIndex] = fp.index
-            it[FileLink.name] = fp.name
-            it[FileLink.itemIndexId] = itemId
-        }
+
+    FileLink.batchInsert(files) { fp ->
+        this[FileLink.fileIndex] = fp.index
+        this[FileLink.name] = fp.name
+        this[FileLink.itemIndexId] = itemId
+    }
+    ItemTag.batchInsert(encryptedTags) { tag ->
+        this[ItemTag.itemId] = itemId
+        this[ItemTag.encryptedTag] = tag
     }
     updateLatestUpdateTime(userId)
     itemId
+}
+
+fun getFileNamesByItemId(userId: Long, itemId: Long): List<String> = transaction {
+    (User innerJoin ItemIndex innerJoin FileLink)
+        .slice(FileLink.name)
+        .select {
+            (User.id eq userId) and (ItemIndex.id eq itemId)
+        }
+        .orderBy(FileLink.fileIndex, SortOrder.ASC)
+        .map{
+            it[FileLink.name]
+        }
 }

@@ -1,6 +1,5 @@
 package service
 
-import config.GlobalFileManager
 import data.http.item.ItemIndexData
 import data.http.item.ItemIndexPaging
 import data.http.item.ItemTagData
@@ -14,7 +13,6 @@ import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import utils.zError
-import java.io.InputStream
 
 fun getItemData(userId: Long, itemId: Long) = transaction {
     val result = (User innerJoin ItemIndex).select{
@@ -32,6 +30,7 @@ fun getItemData(userId: Long, itemId: Long) = transaction {
         id = result[ItemIndex.id],
         encryptedMeta = result[ItemIndex.encryptedMeta],
         encryptedKey = result[ItemIndex.encryptedKey],
+        previewFile = result[ItemIndex.previewFile],
         tags = tags
     )
 }
@@ -64,9 +63,9 @@ fun queryItemsOfUser(userId: Long, offset: Int, limit: Int): List<ItemIndexData>
             }
         }.toMap()
     (User innerJoin ItemIndex)
-        .slice(ItemIndex.id, ItemIndex.encryptedKey, ItemIndex.encryptedMeta)
+        .slice(ItemIndex.id, ItemIndex.encryptedKey, ItemIndex.encryptedMeta, ItemIndex.previewFile)
         .select { User.id eq userId }
-        .orderBy(ItemIndex.id, SortOrder.DESC)
+        .orderBy(ItemIndex.id, SortOrder.ASC)
         .limit(limit, offset)
         .map {
             val id = it[ItemIndex.id]
@@ -74,6 +73,7 @@ fun queryItemsOfUser(userId: Long, offset: Int, limit: Int): List<ItemIndexData>
                 id = id,
                 encryptedMeta = it[ItemIndex.encryptedMeta],
                 encryptedKey = it[ItemIndex.encryptedKey],
+                previewFile = it[ItemIndex.previewFile],
                 tags = tagMap[id] ?: emptyList()
             )
         }
@@ -97,7 +97,7 @@ fun deleteItemIndex(userId: Long, itemId: Long): Unit = transaction {
         zError("userId and itemId not match")
     }
     FileLink.deleteWhere { FileLink.itemIndexId eq itemId }
-    ItemTag.deleteWhere { ItemTag.id eq itemId }
-    ItemIndex.deleteWhere { FileLink.id eq itemId }
+    ItemTag.deleteWhere { ItemTag.itemId eq itemId }
+    ItemIndex.deleteWhere { ItemIndex.id eq itemId }
     updateLatestUpdateTime(userId)
 }
