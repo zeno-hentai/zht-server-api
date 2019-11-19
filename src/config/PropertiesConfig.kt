@@ -2,6 +2,7 @@ package config
 
 import com.natpryce.konfig.*
 import java.io.File
+import java.util.logging.Level
 
 
 class ZHTApiProperties(private val config: Configuration) {
@@ -19,6 +20,7 @@ class ZHTApiProperties(private val config: Configuration) {
     val dbDriver by lazyPropertyByName("db.driver", stringType)
     val dbCreateTables by lazyPropertyByName("db.createTables", booleanType)
     val authSalt by lazyPropertyByName("auth.salt", stringType)
+    val logLevel by lazyPropertyByName("log.level", enumType<org.slf4j.event.Level>())
     val fileManagerClass by lazyPropertyByName("service.file.class", stringType)
     val kvServiceClass by lazyPropertyByName("service.kv.class", stringType)
 }

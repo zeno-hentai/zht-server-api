@@ -1,5 +1,6 @@
 package controller.http
 
+import data.http.user.UserUnauthorizedResponse
 import io.ktor.application.call
 import io.ktor.routing.Route
 import io.ktor.routing.get
@@ -13,7 +14,7 @@ fun Route.userRouting() {
     get("info") {
         val userInfo = call.userId?.let {
             getUserInfoByUserId(it)
-        }
+        } ?: UserUnauthorizedResponse()
         call.apiRespond(userInfo)
     }
 

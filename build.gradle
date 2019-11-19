@@ -54,6 +54,10 @@ dependencies {
 
 //    compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.28.0'
 
+    // https://mvnrepository.com/artifact/com.google.guava/guava
+    compile group: 'com.google.guava', name: 'guava', version: '28.1-jre'
+
+
 
     testCompile "io.ktor:ktor-server-tests:$ktor_version"
     testCompile "io.ktor:ktor-client-mock:$ktor_version"

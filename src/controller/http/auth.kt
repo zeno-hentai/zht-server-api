@@ -19,6 +19,7 @@ import service.getUserInfoByUserId
 import utils.api.ZHTSession
 import utils.api.apiRespond
 import utils.api.authorizedUserId
+import utils.api.userId
 import utils.zError
 
 fun MasterKeyRequest.checkMasterKey () {
@@ -37,7 +38,7 @@ fun Route.authRouting(){
             publicKey = request.publicKey,
             encryptedPrivateKey = request.encryptedPrivateKey
         )
-        call.sessions.set(ZHTSession(userId))
+        call.userId = userId
         call.apiRespond(getUserInfoByUserId(userId))
     }
 
@@ -47,9 +48,7 @@ fun Route.authRouting(){
             username = request.username,
             password = request.password
         )
-        call.sessions.set(ZHTSession(
-            userId = userId
-        ))
+        call.userId = userId
         call.apiRespond(getUserInfoByUserId(userId))
     }
 

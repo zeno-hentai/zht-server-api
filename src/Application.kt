@@ -26,6 +26,7 @@ import io.ktor.websocket.webSocket
 import org.slf4j.event.Level
 import utils.ZhtApiException
 import utils.api.ZHTSession
+import utils.api.ZhtApiErrorResponse
 import java.text.DateFormat
 import java.time.Duration
 
@@ -48,7 +49,7 @@ fun Application.module(testing: Boolean = false) {
     }
 
     install(CallLogging) {
-        level = Level.INFO
+        level = ZHTConfig.logLevel
     }
 
     install(ContentNegotiation) {
@@ -63,9 +64,7 @@ fun Application.module(testing: Boolean = false) {
 
     install(StatusPages) {
         exception <ZhtApiException> {
-            call.respond(mapOf(
-                "error" to it.message
-            ))
+            call.respond(ZhtApiErrorResponse(it.message))
             log.trace(it.message, it)
         }
     }

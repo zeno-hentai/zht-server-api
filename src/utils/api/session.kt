@@ -1,16 +1,35 @@
 package utils.api
 
+import config.SessionKVService
 import io.ktor.application.ApplicationCall
 import io.ktor.sessions.get
+import io.ktor.sessions.set
 import io.ktor.sessions.sessions
 import utils.zError
 import java.io.Serializable
+import java.util.*
 
-data class ZHTSession(val userId: Long?): Serializable
+data class ZHTSession(val token: String?): Serializable {
+    constructor(): this(null)
+}
 
-val ApplicationCall.userId: Long?
+var ApplicationCall.userId: Long?
     get() {
-        return sessions.get<ZHTSession>()?.userId
+        return sessions.get<ZHTSession>()?.token?.let{
+            SessionKVService[it]?.toLong()
+        }
+    }
+    set(value) {
+        if(value == null){
+            sessions.set(ZHTSession(null))
+        }else{
+            sessions.get<ZHTSession>()?.token?.let {
+                SessionKVService.delete(it)
+            }
+            val token = UUID.randomUUID().toString()
+            SessionKVService[token] = value.toString()
+            sessions.set(ZHTSession(token))
+        }
     }
 
 val ApplicationCall.authorizedUserId: Long

@@ -1,6 +1,8 @@
 package config
 
 import service.file.ZHTFileManager
+import service.kv.MemoryKeyValueService
+import service.kv.PrefixKeyValueService
 import service.kv.ZHTKeyValueService
 
 private inline fun <reified T> lazyLoadClassByName(crossinline getName: () -> String): Lazy<T> = lazy {
@@ -9,4 +11,7 @@ private inline fun <reified T> lazyLoadClassByName(crossinline getName: () -> St
 }
 
 val GlobalFileManager by lazyLoadClassByName<ZHTFileManager>{ ZHTConfig.fileManagerClass }
-val GlobalKVService by lazyLoadClassByName<ZHTKeyValueService>{ ZHTConfig.kvServiceClass }
+
+private val GlobalKVService by lazyLoadClassByName<ZHTKeyValueService>{ ZHTConfig.kvServiceClass }
+val SessionKVService by lazy { PrefixKeyValueService(GlobalKVService, "session") }
+val WSKVService: ZHTKeyValueService by lazy { MemoryKeyValueService() }
