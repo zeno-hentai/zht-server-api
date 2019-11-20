@@ -54,6 +54,7 @@ fun Route.itemRouting() {
             val encryptedFileName = call.parameters["encryptedFileName"] ?: zError("missing encryptedFileName")
             val stream = call.receiveStream()
             addFileToItem(call.authorizedUserId, itemId, encryptedFileName, stream)
+            call.apiRespond()
         }
         delete("delete/{itemId}/{mappedFileName}") {
             val itemId = call.parameters["itemId"]?.toLong() ?: zError("missing itemId")
