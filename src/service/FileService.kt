@@ -10,9 +10,9 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import utils.maxValue
 import utils.zError
 
-fun authorizeFile(userId: Long, name: String): Boolean = transaction {
+fun authorizeFile(userId: Long, itemId: Long, name: String): Boolean = transaction {
     (User innerJoin ItemIndex innerJoin FileLink).select {
-        (User.id eq userId) and (FileLink.name eq name)
+        (User.id eq userId) and (ItemIndex.id eq itemId) and (FileLink.mappedName eq name)
     }.count() != 0
 }
 
@@ -31,8 +31,8 @@ fun addPackagedFileIndex(
     val itemId = ItemIndex.maxValue(ItemIndex.id) ?: zError("failed to add file")
 
     FileLink.batchInsert(files) { fp ->
-        this[FileLink.fileIndex] = fp.index
-        this[FileLink.name] = fp.name
+        this[FileLink.encryptedOriginalName] = fp.encryptedOriginalName
+        this[FileLink.mappedName] = fp.mappedName
         this[FileLink.itemIndexId] = itemId
     }
     ItemTag.batchInsert(encryptedTags) { tag ->
@@ -43,14 +43,13 @@ fun addPackagedFileIndex(
     itemId
 }
 
-fun getFileNamesByItemId(userId: Long, itemId: Long): List<String> = transaction {
+fun getFileNamesByItemId(userId: Long, itemId: Long): Map<String, String> = transaction {
     (User innerJoin ItemIndex innerJoin FileLink)
-        .slice(FileLink.name)
+        .slice(FileLink.encryptedOriginalName, FileLink.mappedName)
         .select {
             (User.id eq userId) and (ItemIndex.id eq itemId)
         }
-        .orderBy(FileLink.fileIndex, SortOrder.ASC)
         .map{
-            it[FileLink.name]
-        }
+            it[FileLink.encryptedOriginalName] to it[FileLink.mappedName]
+        }.toMap()
 }

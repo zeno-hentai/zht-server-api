@@ -49,7 +49,7 @@ fun unpackResourceFile(userId: Long, inputStream: InputStream): Long{
         val name = fileNameMapping[nm] ?: zError("unknown file: $nm")
         val data = fileMap[resName] ?: zError("file not exists: $resName")
         GlobalFileManager.addFile(name, data.inputStream())
-        PackagedFileLink(idx, name)
+        PackagedFileLink(nm, name)
     }
     return addPackagedFileIndex(
         encryptedKey = meta.encryptedKey,

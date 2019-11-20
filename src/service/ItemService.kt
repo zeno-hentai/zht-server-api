@@ -77,13 +77,12 @@ fun queryItemsOfUser(userId: Long, offset: Int, limit: Int): List<ItemIndexData>
         }
 }
 
-fun queryFileListByItemId(userId: Long, itemId: Long): List<String> = transaction {
+fun queryMappedFileListByItemId(userId: Long, itemId: Long): List<String> = transaction {
     (User innerJoin ItemIndex innerJoin FileLink)
-        .slice(FileLink.name)
+        .slice(FileLink.mappedName)
         .select { (User.id eq userId) and (ItemIndex.id eq itemId) }
-        .orderBy(FileLink.fileIndex, SortOrder.ASC)
         .map{
-            it[FileLink.name]
+            it[FileLink.mappedName]
         }
 }
 

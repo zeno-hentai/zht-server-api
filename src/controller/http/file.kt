@@ -13,12 +13,13 @@ import utils.zError
 
 fun Route.fileRouting(){
     /**
-     * GET /api/file/data/{name}
+     * GET /api/file/data/{itemId}/{name}
      */
-    get("data/{name}") {
+    get("data/{itemId}/{name}") {
+        val itemId = call.parameters["itemId"]?.toLong() ?: zError("Misssing itemId")
         val name = call.parameters["name"] ?: zError("Empty Filename")
         val userId = call.authorizedUserId
-        if(!authorizeFile(userId, name)){
+        if(!authorizeFile(userId, itemId, name)){
             zError("Failed to authorize file.")
         }
         call.respondOutputStream {
