@@ -50,7 +50,7 @@ fun getUserIdByAPIToken(token: String): Long? = transaction {
 }
 
 fun getUserPublicKey(userId: Long): String = transaction {
-    User.select{ User.id eq userId }.first()[User.publicKey]
+    User.select{ User.id eq userId }.firstOrNull()?.get(User.publicKey) ?: zError("user not found")
 }
 
 fun getUserInfoByUserId(userId: Long): UserInformationResponse = transaction {

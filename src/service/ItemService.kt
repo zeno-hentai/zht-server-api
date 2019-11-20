@@ -30,8 +30,7 @@ fun getItemData(userId: Long, itemId: Long) = transaction {
         id = result[ItemIndex.id],
         encryptedMeta = result[ItemIndex.encryptedMeta],
         encryptedKey = result[ItemIndex.encryptedKey],
-        previewFile = result[ItemIndex.previewFile],
-        tags = tags
+        encryptedTags = tags
     )
 }
 
@@ -63,7 +62,7 @@ fun queryItemsOfUser(userId: Long, offset: Int, limit: Int): List<ItemIndexData>
             }
         }.toMap()
     (User innerJoin ItemIndex)
-        .slice(ItemIndex.id, ItemIndex.encryptedKey, ItemIndex.encryptedMeta, ItemIndex.previewFile)
+        .slice(ItemIndex.id, ItemIndex.encryptedKey, ItemIndex.encryptedMeta)
         .select { User.id eq userId }
         .orderBy(ItemIndex.id, SortOrder.ASC)
         .limit(limit, offset)
@@ -73,8 +72,7 @@ fun queryItemsOfUser(userId: Long, offset: Int, limit: Int): List<ItemIndexData>
                 id = id,
                 encryptedMeta = it[ItemIndex.encryptedMeta],
                 encryptedKey = it[ItemIndex.encryptedKey],
-                previewFile = it[ItemIndex.previewFile],
-                tags = tagMap[id] ?: emptyList()
+                encryptedTags = tagMap[id] ?: emptyList()
             )
         }
 }

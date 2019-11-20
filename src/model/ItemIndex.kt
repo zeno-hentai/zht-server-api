@@ -8,5 +8,4 @@ object ItemIndex: Table("item_indices") {
     val encryptedMeta = text("encrypted_meta")
     val encryptedKey = text("encrypted_key")
     val ownerId = long("owner_id").references(User.id, onDelete = ReferenceOption.CASCADE)
-    val previewFile = varchar("preview_file", 1024)
 }

@@ -20,7 +20,9 @@ fun transferFileFromFileManager(name: String, out: OutputStream){
 private fun ZipInputStream.entries() = sequence {
     var entry = nextEntry
     while(entry != null){
-        yield(entry.name to readNBytes(entry.size.toInt()))
+        if(!entry.isDirectory){
+            yield(entry.name to readNBytes(entry.size.toInt()))
+        }
         entry = nextEntry
     }
     close()
@@ -42,10 +44,10 @@ fun unpackResourceFile(userId: Long, inputStream: InputStream): Long{
     val fileNameMapping = meta.files.map {
         it to UUID.randomUUID().toString()
     }.toMap()
-    val previewFile = fileNameMapping[meta.previewFile] ?: zError("missing previewFile")
     val fileList = meta.files.withIndex().map { (idx, nm) ->
-        val name = fileNameMapping[nm] ?: zError("?")
-        val data = fileMap[nm] ?: zError("file not exists: $nm")
+        val resName = "resource/$nm"
+        val name = fileNameMapping[nm] ?: zError("unknown file: $nm")
+        val data = fileMap[resName] ?: zError("file not exists: $resName")
         GlobalFileManager.addFile(name, data.inputStream())
         PackagedFileLink(idx, name)
     }
@@ -53,7 +55,6 @@ fun unpackResourceFile(userId: Long, inputStream: InputStream): Long{
         encryptedKey = meta.encryptedKey,
         encryptedMeta = meta.encryptedMeta,
         encryptedTags = meta.encryptedTags,
-        previewFile = previewFile,
         files = fileList,
         userId = userId
     )

@@ -19,7 +19,7 @@ import utils.zError
 
 private fun ApplicationCall.userIdFromToken(): Long {
     val token = request.headers["ZHT-API-TOKEN"] ?: zError("Missing header: ZHT-API-TOKEN")
-    return getUserIdByAPIToken(token) ?: zError("Unknown token.")
+    return getUserIdByAPIToken(token) ?: zError("Unknown token: '$token'")
 }
 
 fun Route.apiRouting(){
@@ -41,7 +41,7 @@ fun Route.apiRouting(){
     }
 
     /**
-     * POST /api/file/user/public-key
+     * POST /api/api/public-key
      */
     get("public-key") {
         val userId = call.userIdFromToken()

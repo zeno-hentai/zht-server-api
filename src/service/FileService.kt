@@ -20,7 +20,6 @@ fun addPackagedFileIndex(
     encryptedMeta: String,
     encryptedKey: String,
     encryptedTags: List<String>,
-    previewFile: String,
     files: List<PackagedFileLink>,
     userId: Long
 ): Long = transaction {
@@ -28,7 +27,6 @@ fun addPackagedFileIndex(
         it[ItemIndex.ownerId] = userId
         it[ItemIndex.encryptedKey] = encryptedKey
         it[ItemIndex.encryptedMeta] = encryptedMeta
-        it[ItemIndex.previewFile] = previewFile
     }
     val itemId = ItemIndex.maxValue(ItemIndex.id) ?: zError("failed to add file")
 

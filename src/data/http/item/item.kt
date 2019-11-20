@@ -4,7 +4,6 @@ data class RequestPackedMetaData(
     val encryptedMeta: String,
     val encryptedKey: String,
     val encryptedTags: List<String>,
-    val previewFile: String,
     val files: List<String>
 )
 
@@ -21,6 +20,5 @@ data class ItemIndexData(
     val id: Long,
     val encryptedMeta: String,
     val encryptedKey: String,
-    val previewFile: String,
-    val tags: List<ItemTagData>
+    val encryptedTags: List<ItemTagData>
 )
