@@ -6,7 +6,6 @@ import data.http.item.CreateItemRequest
 import facade.addFileToItem
 import facade.createAPIToken
 import facade.createItemIndex
-import facade.unpackResourceFile
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.request.receive
@@ -50,16 +49,6 @@ fun Route.apiRouting(){
         val userId = call.userIdFromToken()
         call.apiRespond(getUserPublicKey(userId))
     }
-
-    /**
-     * POST /api/api/upload
-     */
-//    post("upload") {
-//        val userId = call.userIdFromToken()
-//        val stream = call.receiveStream()
-//        val itemId = unpackResourceFile(userId, stream)
-//        call.apiRespond(UploadResponse(itemId))
-//    }
 
     route("item") {
         post("add") {

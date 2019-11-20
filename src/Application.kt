@@ -23,7 +23,6 @@ import io.ktor.routing.routing
 import io.ktor.sessions.Sessions
 import io.ktor.sessions.cookie
 import io.ktor.websocket.webSocket
-import org.slf4j.event.Level
 import utils.ZhtApiException
 import utils.api.ZHTSession
 import utils.api.ZhtApiErrorResponse

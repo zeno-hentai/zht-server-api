@@ -12,7 +12,6 @@ import io.ktor.routing.delete
 import io.ktor.routing.post
 import io.ktor.sessions.clear
 import io.ktor.sessions.sessions
-import io.ktor.sessions.set
 import service.authorizeUser
 import service.createUser
 import service.getUserInfoByUserId

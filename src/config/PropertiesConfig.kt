@@ -2,7 +2,6 @@ package config
 
 import com.natpryce.konfig.*
 import java.io.File
-import java.util.logging.Level
 
 
 class ZHTApiProperties(private val config: Configuration) {
