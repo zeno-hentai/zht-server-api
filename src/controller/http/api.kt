@@ -2,7 +2,10 @@ package controller.http
 
 import data.http.api.GenerateAPITokenRequest
 import data.http.file.UploadResponse
+import data.http.item.CreateItemRequest
+import facade.addFileToItem
 import facade.createAPIToken
+import facade.createItemIndex
 import facade.unpackResourceFile
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
@@ -51,10 +54,30 @@ fun Route.apiRouting(){
     /**
      * POST /api/api/upload
      */
-    post("upload") {
-        val userId = call.userIdFromToken()
-        val stream = call.receiveStream()
-        val itemId = unpackResourceFile(userId, stream)
-        call.apiRespond(UploadResponse(itemId))
+//    post("upload") {
+//        val userId = call.userIdFromToken()
+//        val stream = call.receiveStream()
+//        val itemId = unpackResourceFile(userId, stream)
+//        call.apiRespond(UploadResponse(itemId))
+//    }
+
+    route("item") {
+        post("add") {
+            val userId = call.userIdFromToken()
+            val request = call.receive<CreateItemRequest>()
+            val itemId = createItemIndex(userId, request)
+            call.apiRespond(UploadResponse(itemId))
+        }
+    }
+
+    route("file") {
+        put("upload/{itemId}/{encryptedFileName}") {
+            val userId = call.userIdFromToken()
+            val itemId = call.parameters["itemId"]?.toLong() ?: zError("missing itemId")
+            val encryptedFileName = call.parameters["encryptedFileName"] ?: zError("missing encryptedFileName")
+            val stream = call.receiveStream()
+            addFileToItem(userId, itemId, encryptedFileName, stream)
+            call.apiRespond()
+        }
     }
 }

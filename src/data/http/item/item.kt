@@ -7,6 +7,12 @@ data class RequestPackedMetaData(
     val files: List<String>
 )
 
+data class CreateItemRequest(
+    val encryptedMeta: String,
+    val encryptedKey: String,
+    val encryptedTags: List<String>
+)
+
 data class ItemIndexPaging(
     val total: Int
 )

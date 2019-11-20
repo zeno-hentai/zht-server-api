@@ -16,32 +16,32 @@ fun authorizeFile(userId: Long, itemId: Long, name: String): Boolean = transacti
     }.count() != 0
 }
 
-fun addPackagedFileIndex(
-    encryptedMeta: String,
-    encryptedKey: String,
-    encryptedTags: List<String>,
-    files: List<PackagedFileLink>,
-    userId: Long
-): Long = transaction {
-    ItemIndex.insert {
-        it[ItemIndex.ownerId] = userId
-        it[ItemIndex.encryptedKey] = encryptedKey
-        it[ItemIndex.encryptedMeta] = encryptedMeta
-    }
-    val itemId = ItemIndex.maxValue(ItemIndex.id) ?: zError("failed to add file")
-
-    FileLink.batchInsert(files) { fp ->
-        this[FileLink.encryptedOriginalName] = fp.encryptedOriginalName
-        this[FileLink.mappedName] = fp.mappedName
-        this[FileLink.itemIndexId] = itemId
-    }
-    ItemTag.batchInsert(encryptedTags) { tag ->
-        this[ItemTag.itemId] = itemId
-        this[ItemTag.encryptedTag] = tag
-    }
-    updateLatestUpdateTime(userId)
-    itemId
-}
+//fun addPackagedFileIndex(
+//    encryptedMeta: String,
+//    encryptedKey: String,
+//    encryptedTags: List<String>,
+//    files: List<PackagedFileLink>,
+//    userId: Long
+//): Long = transaction {
+//    ItemIndex.insert {
+//        it[ItemIndex.ownerId] = userId
+//        it[ItemIndex.encryptedKey] = encryptedKey
+//        it[ItemIndex.encryptedMeta] = encryptedMeta
+//    }
+//    val itemId = ItemIndex.maxValue(ItemIndex.id) ?: zError("failed to add file")
+//
+//    FileLink.batchInsert(files) { fp ->
+//        this[FileLink.encryptedOriginalName] = fp.encryptedOriginalName
+//        this[FileLink.mappedName] = fp.mappedName
+//        this[FileLink.itemIndexId] = itemId
+//    }
+//    ItemTag.batchInsert(encryptedTags) { tag ->
+//        this[ItemTag.itemId] = itemId
+//        this[ItemTag.encryptedTag] = tag
+//    }
+//    updateLatestUpdateTime(userId)
+//    itemId
+//}
 
 fun getFileNamesByItemId(userId: Long, itemId: Long): Map<String, String> = transaction {
     (User innerJoin ItemIndex innerJoin FileLink)
@@ -52,4 +52,58 @@ fun getFileNamesByItemId(userId: Long, itemId: Long): Map<String, String> = tran
         .map{
             it[FileLink.encryptedOriginalName] to it[FileLink.mappedName]
         }.toMap()
+}
+
+fun addItemIndexRecord(
+    userId: Long,
+    encryptedMeta: String,
+    encryptedKey: String,
+    encryptedTags: List<String>
+): Long = transaction {
+    ItemIndex.insert {
+        it[ItemIndex.ownerId] = userId
+        it[ItemIndex.encryptedKey] = encryptedKey
+        it[ItemIndex.encryptedMeta] = encryptedMeta
+    }
+    val itemId = ItemIndex.maxValue(ItemIndex.id) ?: zError("failed to add file")
+    ItemTag.batchInsert(encryptedTags) { tag ->
+        this[ItemTag.itemId] = itemId
+        this[ItemTag.encryptedTag] = tag
+    }
+    itemId
+}
+
+fun addFileLinkToItemIndex(
+    userId: Long,
+    itemId: Long,
+    encryptedOriginalName: String,
+    mappedFileName: String,
+    uploadCallback: () -> Unit
+): Unit = transaction {
+    if((User innerJoin ItemIndex).select{(User.id eq userId) and (ItemIndex.id eq itemId)}.count() == 0){
+        zError("unauthorized")
+    }
+    FileLink.insert {
+        it[FileLink.itemIndexId] = itemId
+        it[FileLink.encryptedOriginalName] = encryptedOriginalName
+        it[FileLink.mappedName] = mappedFileName
+    }
+    uploadCallback()
+}
+
+fun deleteFileLinkFromItemIndex(
+    userId: Long,
+    itemId: Long,
+    mappedFileName: String,
+    deleteCallback: () -> Unit
+): Unit = transaction {
+    if((User innerJoin ItemIndex).select{
+            (User.id eq userId) and
+                    (ItemIndex.id eq itemId) and
+                    (FileLink.mappedName eq mappedFileName)
+        }.count() == 0){
+        zError("unauthorized")
+    }
+    FileLink.deleteWhere { FileLink.mappedName eq mappedFileName }
+    deleteCallback()
 }
