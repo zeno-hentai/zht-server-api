@@ -1,27 +1,21 @@
 language: java
 install: true
-
 os: linux
 dist: trusty
 jdk: oraclejdk12
-
-jobs:
-  include:
-    - script: ./gradlew build
-      before_cache:
-        - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-        - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
-      cache:
-        directories:
-          - $HOME/.gradle/caches/
-          - $HOME/.gradle/wrapper/
-    - stage: GitHub Release
-      script: echo "Deploying to GitHub releases ..."
-      deploy:
-        provider: releases
-        api_key: $GITHUB_OAUTH_TOKEN
-        skip_cleanup: true
-        file_glob: true
-        file: "./build/libs/zht-server-api-*-all.jar"
-        on:
-          tags: true
+script: "./gradlew build"
+before_cache:
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+deploy:
+  provider: releases
+  api_key:
+    secure: n6ze9yleGAwRQwXUbT7H14plMWEzg1vArKyCLIF5XiMshkH3rJKEz1H92RbNnpgSEKLLJLF5zFCWQtLC8rT0N6bkUl3H8bpIwsJffvNYWqgNKFSTsFg+4HN7r4rtax0SqSK2QrYw+iJHxsJHRwsakP2akDrRUt+BAabWG4P20KNIXwiEHyEhjI92g7kHDo7P7XwvuSVjYf452/Wrb3B5WzleHP06CWfPKMj5agfUEj9X5kSncgvtk6CUdIGMe4Ad5e2YCq/eMu06uh6BGQFPH4R2AE9X6m1XnNJyr7WnjDT/hKtiPrK5irChNpkDrzSIVx68Kkq55hk5bSo6OHcSGmXIhTPbUCSQ0E85JtAtQqo1Z4/0Y3KA43Kz5JvuUOZhawwztOPu27Ss7Xa9UZ2tfXtNOPlu2Ja5GQFbJ5ugmUn+3as89JBRlnvrXsXPGBljp7pLat/BzfGInePcR3N8AWrHPzSkry0/3UGUzMWHM3850Z1rXUQDMj+ihYDH4NXE6k3EcF7WQiYLLnW2bosZh9+YOwUW8VyGlpDNjK40Ib6zcaso49hlQzPPCFdNEMG63whDhzt8D8oLgPH0srGYywiQBcl/ZR84vZAwx3hgLKNnhdbzEtpCD+L0g/bbGgPTfjvkZJ7jM+MPlV+wcs8L4tMsvL3YADsKsVZdeZZbMvs=
+  file_glob: true
+  file: build/libs/zht-server-api-*.jar
+  on:
+    repo: zeno-hentai/zht-server-api
