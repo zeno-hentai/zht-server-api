@@ -45,6 +45,15 @@ fun addItemIndexRecord(
     itemId
 }
 
+fun updateItemEncryptedMeta(userId: Long, itemId: Long, encryptedMeta: String) = transaction {
+    if((User innerJoin ItemIndex).select { (User.id eq userId) and (ItemIndex.id eq itemId) }.count() == 0) {
+        zError("unauthorized")
+    }
+    ItemIndex.update({ ItemIndex.id eq itemId }) {
+        it[ItemIndex.encryptedMeta] = encryptedMeta
+    }
+}
+
 fun addFileLinkToItemIndex(
     userId: Long,
     itemId: Long,
@@ -69,7 +78,7 @@ fun deleteFileLinkFromItemIndex(
     mappedFileName: String,
     deleteCallback: () -> Unit
 ): Unit = transaction {
-    if((User innerJoin ItemIndex).select{
+    if((User innerJoin ItemIndex innerJoin FileLink).select{
             (User.id eq userId) and
                     (ItemIndex.id eq itemId) and
                     (FileLink.mappedName eq mappedFileName)

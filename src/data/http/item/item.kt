@@ -13,6 +13,11 @@ data class CreateItemRequest(
     val encryptedTags: List<String>
 )
 
+data class UpdateEncryptedMetaRequest (
+    val encryptedMeta: String,
+    val itemId: Long
+)
+
 data class ItemIndexPaging(
     val total: Int
 )

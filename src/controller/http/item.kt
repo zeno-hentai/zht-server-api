@@ -3,6 +3,7 @@ package controller.http
 import data.http.file.UploadResponse
 import data.http.item.AddItemTagRequest
 import data.http.item.CreateItemRequest
+import data.http.item.UpdateEncryptedMetaRequest
 import facade.addFileToItem
 import facade.createItemIndex
 import facade.deleteFileFromItem
@@ -34,6 +35,12 @@ fun Route.itemRouting() {
         val request = call.receive<CreateItemRequest>()
         val itemId = createItemIndex(call.authorizedUserId, request)
         call.apiRespond(UploadResponse(itemId))
+    }
+
+    put("update/meta") {
+        val request = call.receive<UpdateEncryptedMetaRequest>()
+        updateItemEncryptedMeta(call.authorizedUserId, request.itemId, request.encryptedMeta)
+        call.apiRespond()
     }
 
     get("query/{offset}/{limit}") {
