@@ -5,23 +5,23 @@ os: linux
 dist: trusty
 jdk: oraclejdk12
 
-script:
-  - ./gradlew build
-
-before_cache:
-  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
-
-cache:
-  directories:
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
-
-deploy:
-  provider: releases
-  api_key: "GITHUB OAUTH TOKEN"
-  file_glob: true
-  file: "./build/libs/zht-server-api-*-all.jar"
-  skip_cleanup: true
-  on:
-    tags: true
+jobs:
+  include:
+    - script: ./gradlew build
+      before_cache:
+        - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+        - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+      cache:
+        directories:
+          - $HOME/.gradle/caches/
+          - $HOME/.gradle/wrapper/
+    - stage: GitHub Release
+      script: echo "Deploying to GitHub releases ..."
+      deploy:
+        provider: releases
+        api_key: $GITHUB_OAUTH_TOKEN
+        skip_cleanup: true
+        file_glob: true
+        file: "./build/libs/zht-server-api-*-all.jar"
+        on:
+          tags: true
