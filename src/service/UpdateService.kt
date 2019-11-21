@@ -1,30 +1,29 @@
 package service
 
-import model.UserLatestUpdate
-import org.jetbrains.exposed.sql.Transaction
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
+import model.ItemIndex
+import model.ItemLatestUpdate
+import model.User
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.update
 import org.joda.time.DateTime
 
-fun queryLatestUpdateTime(userId: Long) = transaction {
-    UserLatestUpdate
-        .select { UserLatestUpdate.userId eq userId }
-        .firstOrNull()
-        ?.let {
-            it[UserLatestUpdate.latestUpdateTime]
-        } ?: DateTime(0)
+fun queryUpdatedItemsAfter(userId: Long, after: DateTime): List<Long> = transaction {
+    (User innerJoin ItemIndex innerJoin ItemLatestUpdate)
+        .slice(ItemIndex.id)
+        .select { (User.id eq userId) and (ItemLatestUpdate.latestUpdateTime greaterEq  after) }
+        .map {
+            it[ItemIndex.id]
+        }
 }
 
-fun Transaction.updateLatestUpdateTime(userId: Long) {
+fun Transaction.updateLatestUpdateTime(itemId: Long) {
     val dateTime = DateTime.now()!!
-    if(UserLatestUpdate.select { UserLatestUpdate.userId eq userId }.count() == 0){
-        UserLatestUpdate.insert {
-            it[UserLatestUpdate.userId] = userId
+    if(ItemLatestUpdate.select { ItemLatestUpdate.itemId eq itemId }.count() == 0){
+        ItemLatestUpdate.insert {
+            it[ItemLatestUpdate.itemId] = itemId
         }
     }
-    UserLatestUpdate.update({ UserLatestUpdate.userId eq userId }) {
-        it[UserLatestUpdate.latestUpdateTime] = dateTime
+    ItemLatestUpdate.update({ ItemLatestUpdate.itemId eq itemId }) {
+        it[ItemLatestUpdate.latestUpdateTime] = dateTime
     }
 }

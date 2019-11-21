@@ -12,6 +12,7 @@ import io.ktor.application.call
 import io.ktor.request.receive
 import io.ktor.request.receiveStream
 import io.ktor.routing.*
+import org.joda.time.DateTime
 import service.*
 import utils.api.apiRespond
 import utils.api.authorizedUserId
@@ -47,6 +48,20 @@ fun Route.itemRouting() {
         val offset = call.parameters["offset"]?.toInt() ?: zError("missing offset")
         val limit = call.parameters["limit"]?.toInt() ?: zError("missing limit")
         call.apiRespond(queryItemsOfUser(call.authorizedUserId, offset, limit))
+    }
+
+    get("updated/after/{ts}") {
+        val ts = call.parameters["ts"]?.toLong() ?: zError("missing timestamp")
+        val time = DateTime(ts)
+        val updatedItems = queryUpdatedItemsAfter(call.authorizedUserId, time)
+        call.apiRespond(updatedItems)
+    }
+
+    get("deleted/after/{ts}") {
+        val ts = call.parameters["ts"]?.toLong() ?: zError("missing timestamp")
+        val time = DateTime(ts)
+        val deletedItems = deletedItemsAfter(call.authorizedUserId, time)
+        call.apiRespond(deletedItems)
     }
 
     delete("delete/{itemId}") {

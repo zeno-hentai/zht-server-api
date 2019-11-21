@@ -10,6 +10,6 @@ fun connectDatabase() {
 }
 
 fun createDatabaseTables() = transaction {
-    SchemaUtils.create(User, FileLink, ItemIndex, APIToken, ItemTag, UserLatestUpdate)
+    SchemaUtils.create(User, FileLink, ItemIndex, APIToken, ItemTag, ItemLatestUpdate, ItemDeleteRecord)
     commit()
 }

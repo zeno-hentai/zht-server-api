@@ -3,15 +3,10 @@ package service
 import data.http.item.ItemIndexData
 import data.http.item.ItemIndexPaging
 import data.http.item.ItemTagData
-import model.FileLink
-import model.ItemIndex
-import model.ItemTag
-import model.User
-import org.jetbrains.exposed.sql.SortOrder
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.select
+import model.*
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.joda.time.DateTime
 import utils.zError
 
 fun getItemData(userId: Long, itemId: Long) = transaction {
@@ -95,6 +90,19 @@ fun deleteItemIndex(userId: Long, itemId: Long): Unit = transaction {
     }
     FileLink.deleteWhere { FileLink.itemIndexId eq itemId }
     ItemTag.deleteWhere { ItemTag.itemId eq itemId }
+    ItemLatestUpdate.deleteWhere { ItemLatestUpdate.itemId eq itemId }
     ItemIndex.deleteWhere { ItemIndex.id eq itemId }
-    updateLatestUpdateTime(userId)
+    ItemDeleteRecord.insert {
+        it[ItemDeleteRecord.itemId] = itemId
+        it[ItemDeleteRecord.userId] = userId
+        it[ItemDeleteRecord.deletedAt] = DateTime.now()
+    }
+}
+
+fun deletedItemsAfter(userId: Long, after: DateTime): List<Long> = transaction {
+    ItemDeleteRecord
+        .slice(ItemDeleteRecord.itemId)
+        .select {
+            (ItemDeleteRecord.userId eq userId) and (ItemDeleteRecord.deletedAt greaterEq after)
+        }.map{ it[ItemDeleteRecord.itemId] }
 }

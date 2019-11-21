@@ -24,17 +24,19 @@ fun addTagToItem(userId: Long, itemId: Long, encryptedTag: String) = transaction
         it[ItemTag.encryptedTag] = encryptedTag
     }
     val id = ItemTag.maxValue(ItemTag.id) ?: zError("failed to add tag")
-    updateLatestUpdateTime(userId)
+    updateLatestUpdateTime(itemId)
     AddItemTagResponse(id, itemId, encryptedTag)
 }
 
 fun deleteTagFromItem(userId: Long, tagId: Long) = transaction {
-    if(
-        (User innerJoin ItemIndex innerJoin ItemTag)
-            .select { (User.id eq userId) and (ItemTag.id eq tagId) }
-            .count() == 0) {
+    val itemId = (User innerJoin ItemIndex innerJoin ItemTag)
+        .slice(ItemIndex.id)
+        .select { (User.id eq userId) and (ItemTag.id eq tagId) }
+        .firstOrNull()?.get(ItemIndex.id)
+    if(itemId == null) {
         zError("Unauthorized")
+    }else{
+        ItemTag.deleteWhere { ItemTag.id eq tagId }
+        updateLatestUpdateTime(itemId)
     }
-    ItemTag.deleteWhere { ItemTag.id eq tagId }
-    updateLatestUpdateTime(userId)
 }
