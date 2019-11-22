@@ -12,6 +12,7 @@ private inline fun <reified T> lazyLoadClassByName(crossinline getName: () -> St
 
 val GlobalFileManager by lazyLoadClassByName<ZHTFileManager>{ ZHTConfig.fileManagerClass }
 
+
 private val GlobalKVService by lazyLoadClassByName<ZHTKeyValueService>{ ZHTConfig.kvServiceClass }
 val SessionKVService by lazy { PrefixKeyValueService(GlobalKVService, "session") }
 val WSKVService: ZHTKeyValueService by lazy { MemoryKeyValueService() }

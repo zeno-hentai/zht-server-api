@@ -82,7 +82,7 @@ fun queryWorkerTasks(userId: Long): List<WorkerTaskInfo> = transaction {
         }
 }
 
-fun retryWorkerTask(userId: Long, taskId: Long) = transaction {
+fun retryWorkerTask(userId: Long, taskId: Long): Long = transaction {
     (User innerJoin RegisteredWorker innerJoin WorkerTask)
         .select {
             (User.id eq userId) and
@@ -92,6 +92,7 @@ fun retryWorkerTask(userId: Long, taskId: Long) = transaction {
     WorkerTask.update({WorkerTask.id eq taskId}) {
         it[WorkerTask.status] = WorkerTaskStatus.SUSPENDED
     }
+    WorkerTask.select { WorkerTask.id eq taskId }.first()[WorkerTask.workerId]
 }
 
 fun pollWorkerTask(workerId: Long): WorkerTaskInfo? = transaction {

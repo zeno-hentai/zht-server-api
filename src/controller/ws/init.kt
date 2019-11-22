@@ -4,6 +4,7 @@ import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.readText
 import io.ktor.routing.Route
 import io.ktor.websocket.webSocket
+import utils.WorkerNotificationChannels
 import utils.api.authorizedUserId
 
 fun Route.initializeWS(){
@@ -16,5 +17,9 @@ fun Route.initializeWS(){
                 send(Frame.Text("Client said: " + frame.readText()))
             }
         }
+    }
+
+    webSocket("worker") {
+        wsWorker()
     }
 }

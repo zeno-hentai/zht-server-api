@@ -12,6 +12,7 @@ import io.ktor.request.receive
 import io.ktor.request.receiveStream
 import io.ktor.routing.*
 import service.*
+import utils.WorkerNotificationChannels
 import utils.api.apiRespond
 import utils.api.authorizedUserId
 import utils.api.get
@@ -30,6 +31,10 @@ private fun ApplicationCall.userIdFromToken(): Long {
 
 private fun ApplicationCall.getWorkerIdFromToken(): Long {
     return getWorkerIdByToken(getAPIToken()) ?: zError("Unknown token")
+}
+
+private suspend fun notifyWorker(workerId: Long) {
+    WorkerNotificationChannels.send(workerId)
 }
 
 fun Route.apiRouting(){
@@ -93,6 +98,7 @@ fun Route.apiRouting(){
                 val request = call.receive<WorkerAddTaskRequest>()
                 addWorkerTask(userId, request)
                 call.apiRespond()
+                notifyWorker(request.workerId)
             }
             get("query") {
                 call.apiRespond(queryWorkerTasks(call.authorizedUserId))
@@ -102,8 +108,9 @@ fun Route.apiRouting(){
             }
             put("retry") {
                 val (taskId) = call.receive<WorkerTaskStatusUpdateRequest>()
-                retryWorkerTask(call.authorizedUserId, taskId)
+                val workerId = retryWorkerTask(call.authorizedUserId, taskId)
                 call.apiRespond()
+                notifyWorker(workerId)
             }
             route("status") {
                 put("success") {
