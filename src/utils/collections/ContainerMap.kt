@@ -11,10 +11,10 @@ class ContainerMap<K, V, C: MutableCollection<V>>(
             .newInstance()
         return collectionClass.cast(collection)
     }
-    fun put(key: K, value: V): List<V> {
+    fun put(key: K, value: V): Iterator<V> {
         val target = map.getOrPut(key){ createCollection() }
         target.add(value)
-        return target.toList()
+        return target.iterator()
     }
     fun remove(key: K, value: V) {
         map[key]?.remove(value)

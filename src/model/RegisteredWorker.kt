@@ -1,7 +1,5 @@
 package model
 
-import model.APIToken.autoIncrement
-import model.APIToken.primaryKey
 import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.Table
 

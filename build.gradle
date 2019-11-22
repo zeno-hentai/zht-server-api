@@ -59,7 +59,8 @@ dependencies {
 
     compile("org.postgresql:postgresql:42.2.2")
 
-
+    // https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk
+    compile group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.11.679'
 
 
     testCompile "io.ktor:ktor-server-tests:$ktor_version"
