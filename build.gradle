@@ -47,7 +47,7 @@ dependencies {
     compile "io.ktor:ktor-client-websocket:1.1.5"
     compile "org.jetbrains.exposed:exposed:0.16.1"
     compile "com.natpryce:konfig:1.6.10.0"
-    compile group: 'postgresql', name: 'postgresql', version: '9.1-901-1.jdbc4'
+//    compile group: 'postgresql', name: 'postgresql', version: '9.1-901-1.jdbc4'
 
     // https://mvnrepository.com/artifact/org.springframework.security/spring-security-crypto
     compile "org.springframework.security:spring-security-crypto:5.2.1.RELEASE"
@@ -56,6 +56,9 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.google.guava/guava
     compile group: 'com.google.guava', name: 'guava', version: '28.1-jre'
+
+    compile("org.postgresql:postgresql:42.2.2")
+
 
 
 

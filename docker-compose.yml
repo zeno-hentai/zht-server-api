@@ -14,6 +14,8 @@ services:
       - '.:/project'
     environment:
       ZHT_CONFIG: .docker/config/config.properties
+    links:
+      - db
     depends_on:
       - db
     command: [sh, './.docker/scripts/launch.sh']
@@ -24,6 +26,9 @@ services:
       POSTGRES_USER: zht
       POSTGRES_PASSWORD: secret
       POSTGRES_DB: zht
+#      PGUSER: zht
+#      PGPASSWORD: secret
+#      PGDATABASE: zht
       PGDATA: /data
     volumes:
       - '.docker/postgres-data:/data'

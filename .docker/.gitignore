@@ -1,4 +1,5 @@
 gradle-cache/*
 config/*.properties
 !config/*.example.properties
-postgres-data/*
+postgres-data/
+mariadb-data/

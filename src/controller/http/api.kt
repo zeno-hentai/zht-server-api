@@ -1,6 +1,6 @@
 package controller.http
 
-import data.http.api.GenerateAPITokenRequest
+import data.http.api.*
 import data.http.file.UploadResponse
 import data.http.item.CreateItemRequest
 import facade.addFileToItem
@@ -11,17 +11,25 @@ import io.ktor.application.call
 import io.ktor.request.receive
 import io.ktor.request.receiveStream
 import io.ktor.routing.*
-import service.deleteApiToken
-import service.getUserIdByAPIToken
-import service.getUserPublicKey
-import service.queryApiTokensByUserId
+import service.*
 import utils.api.apiRespond
 import utils.api.authorizedUserId
+import utils.api.get
 import utils.zError
 
+private fun ApplicationCall.getAPIToken(): String {
+    return request.headers["ZHT-API-TOKEN"] ?: zError("Missing header: ZHT-API-TOKEN")
+}
+
 private fun ApplicationCall.userIdFromToken(): Long {
-    val token = request.headers["ZHT-API-TOKEN"] ?: zError("Missing header: ZHT-API-TOKEN")
-    return getUserIdByAPIToken(token) ?: zError("Unknown token: '$token'")
+    val token = getAPIToken()
+    return  getUserIdByAPIToken(token) ?:
+            getUserIdByWorkerToken(token) ?:
+            zError("Unknown token: '$token'")
+}
+
+private fun ApplicationCall.getWorkerIdFromToken(): Long {
+    return getWorkerIdByToken(getAPIToken()) ?: zError("Unknown token")
 }
 
 fun Route.apiRouting(){
@@ -36,7 +44,7 @@ fun Route.apiRouting(){
         }
 
         delete("delete/{tokenId}") {
-            val tokenId = call.parameters["tokenId"]?.toLong() ?: zError("missing tokenId")
+            val tokenId = call["tokenId"].toLong()
             deleteApiToken(call.authorizedUserId, tokenId)
             call.apiRespond()
         }
@@ -62,10 +70,61 @@ fun Route.apiRouting(){
     route("file") {
         put("upload/{itemId}/{encryptedFileName}") {
             val userId = call.userIdFromToken()
-            val itemId = call.parameters["itemId"]?.toLong() ?: zError("missing itemId")
-            val encryptedFileName = call.parameters["encryptedFileName"] ?: zError("missing encryptedFileName")
+            val itemId = call["itemId"].toLong()
+            val encryptedFileName = call["encryptedFileName"]
             val stream = call.receiveStream()
             addFileToItem(userId, itemId, encryptedFileName, stream)
+            call.apiRespond()
+        }
+    }
+
+    route("worker") {
+        post("register") {
+            val userId = call.userIdFromToken()
+            val request = call.receive<WorkerRegisterRequest>()
+            call.apiRespond(WorkerRegisterResponse(registerWorker(userId, request)))
+        }
+        get("query") {
+            call.apiRespond(queryWorkers(call.authorizedUserId))
+        }
+        route("task") {
+            post("add") {
+                val userId = call.authorizedUserId
+                val request = call.receive<WorkerAddTaskRequest>()
+                addWorkerTask(userId, request)
+                call.apiRespond()
+            }
+            get("query") {
+                call.apiRespond(queryWorkerTasks(call.authorizedUserId))
+            }
+            delete("poll") {
+                call.apiRespond(PolledWorkerTask(pollWorkerTask(call.getWorkerIdFromToken())))
+            }
+            put("retry") {
+                val (taskId) = call.receive<WorkerTaskStatusUpdateRequest>()
+                retryWorkerTask(call.authorizedUserId, taskId)
+                call.apiRespond()
+            }
+            route("status") {
+                put("success") {
+                    val workerId = call.getWorkerIdFromToken()
+                    val (taskId) = call.receive<WorkerTaskStatusUpdateRequest>()
+                    updateWorkerTaskStatus(workerId, taskId, WorkerTaskStatus.SUCCESS)
+                    call.apiRespond()
+                }
+                put("failed") {
+                    val workerId = call.getWorkerIdFromToken()
+                    val (taskId) = call.receive<WorkerTaskStatusUpdateRequest>()
+                    updateWorkerTaskStatus(workerId, taskId, WorkerTaskStatus.FAILED)
+                    call.apiRespond()
+                }
+            }
+        }
+
+        delete("delete/{workerId}") {
+            val workerId = call["workerId"].toLong()
+            val userId = call.authorizedUserId
+            deleteWorker(userId, workerId)
             call.apiRespond()
         }
     }

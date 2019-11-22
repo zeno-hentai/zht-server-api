@@ -16,6 +16,12 @@ class ZHTApiProperties(private val config: Configuration) {
     val debugTestProperty by lazyPropertyByName("debug.test.property", stringType)
     val apiAdminSecret by lazyPropertyByName("api.admin.secret", stringType)
     val dbUrl by lazyPropertyByName("db.url", stringType)
+    val dbUsername by lazy {
+        config.getOrNull(Key("db.user", stringType))
+    }
+    val dbPassword by lazy {
+        config.getOrNull(Key("db.password", stringType))
+    }
     val dbDriver by lazyPropertyByName("db.driver", stringType)
     val dbCreateTables by lazyPropertyByName("db.createTables", booleanType)
     val authSalt by lazyPropertyByName("auth.salt", stringType)

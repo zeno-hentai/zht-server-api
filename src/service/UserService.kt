@@ -3,6 +3,7 @@ package service
 import config.ZHTConfig
 import data.http.user.UserInformationResponse
 import model.APIToken
+import model.RegisteredWorker
 import model.User
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
@@ -47,6 +48,10 @@ fun authorizeUser(username: String, password: String): Long = transaction {
 
 fun getUserIdByAPIToken(token: String): Long? = transaction {
     APIToken.select { APIToken.token eq token }.firstOrNull()?.get(APIToken.userId)
+}
+
+fun getUserIdByWorkerToken(token: String): Long? = transaction {
+    RegisteredWorker.select { RegisteredWorker.token eq token }.firstOrNull()?.get(RegisteredWorker.userId)
 }
 
 fun getUserPublicKey(userId: Long): String = transaction {
