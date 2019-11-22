@@ -76,6 +76,7 @@ task integrationTest(type: Test) {
 
 shadowJar {
     manifest {
+        zip64 = true
         attributes 'Main-Class': 'io.ktor.server.netty.EngineMain'
     }
 }
