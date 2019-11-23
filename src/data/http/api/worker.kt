@@ -29,7 +29,8 @@ data class WorkerAddTaskRequest(
 data class WorkerInfo (
     val id: Long,
     val title: String,
-    val encryptedPublicKey: String
+    val encryptedPublicKey: String,
+    val online: Boolean
 )
 
 data class WorkerTaskInfo (

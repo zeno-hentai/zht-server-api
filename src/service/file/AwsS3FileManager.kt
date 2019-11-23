@@ -7,7 +7,7 @@ import com.natpryce.konfig.stringType
 import config.ZHTConfig
 import java.io.InputStream
 
-object AwsS3FileManager: ZHTFileManager {
+class AwsS3FileManager: ZHTFileManager {
     private val client = AmazonS3ClientBuilder
         .standard()
         .withRegion(Regions.DEFAULT_REGION)

@@ -10,6 +10,7 @@ object WorkerNotificationChannels {
     suspend fun send(workerId: Long){
         map[workerId]?.send()
     }
+    fun exists(workerId: Long) = map[workerId] != null
     fun open(workerId: Long): Handler{
         if(workerId in map){
             map[workerId]?.close()

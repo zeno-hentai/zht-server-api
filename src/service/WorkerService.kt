@@ -7,6 +7,7 @@ import model.User
 import model.WorkerTask
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import utils.WorkerNotificationChannels
 import utils.assertAuthorized
 import utils.maxValue
 import utils.zError
@@ -43,7 +44,8 @@ fun queryWorkers(userId: Long): List<WorkerInfo> = transaction {
             WorkerInfo(
                 id = it[RegisteredWorker.id],
                 title = it[RegisteredWorker.title],
-                encryptedPublicKey = it[RegisteredWorker.encryptedPublicKey]
+                encryptedPublicKey = it[RegisteredWorker.encryptedPublicKey],
+                online = WorkerNotificationChannels.exists(it[RegisteredWorker.id])
             )
         }
 }
