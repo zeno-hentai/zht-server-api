@@ -12,6 +12,11 @@ data class WorkerRegisterRequest(
     val encryptedPublicKey: String
 )
 
+data class WorkerConnectionRequest (
+    val token: String,
+    val encryptedPublicKey: String
+)
+
 data class WorkerTaskStatusUpdateRequest(
     val taskId: Long
 )

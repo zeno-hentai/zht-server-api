@@ -11,6 +11,7 @@ import utils.WorkerNotificationChannels
 import utils.assertAuthorized
 import utils.maxValue
 import utils.zError
+import java.security.PublicKey
 
 private fun Transaction.checkWorkerId(userId: Long, workerId: Long) {
     if((User innerJoin RegisteredWorker)
@@ -50,13 +51,29 @@ fun queryWorkers(userId: Long): List<WorkerInfo> = transaction {
         }
 }
 
+fun getWorker(userId: Long, workerId: Long): WorkerInfo = transaction {
+    (User innerJoin RegisteredWorker).select {
+        (User.id eq userId) and
+                (RegisteredWorker.id eq workerId)
+    }.assertAuthorized()
+    val result = RegisteredWorker.select {
+        RegisteredWorker.id eq workerId
+    }.first()
+    WorkerInfo(
+        id = result[RegisteredWorker.id],
+        title = result[RegisteredWorker.title],
+        encryptedPublicKey = result[RegisteredWorker.encryptedPublicKey],
+        online = WorkerNotificationChannels.exists(result[RegisteredWorker.id])
+    )
+}
+
 fun getWorkerIdByToken(token: String): Long? = transaction {
     RegisteredWorker.select {
         RegisteredWorker.token eq token
     }.firstOrNull()?.get(RegisteredWorker.id)
 }
 
-fun addWorkerTask(userId: Long, request: WorkerAddTaskRequest) = transaction {
+fun addWorkerTask(userId: Long, request: WorkerAddTaskRequest): Long = transaction {
     if((User innerJoin RegisteredWorker).select { (User.id eq userId) and (RegisteredWorker.id eq request.workerId) }.count() == 0){
         zError("unauthorized")
     }
@@ -66,6 +83,7 @@ fun addWorkerTask(userId: Long, request: WorkerAddTaskRequest) = transaction {
         it[WorkerTask.encryptedURLToUser] = request.encryptedURLToUser
         it[WorkerTask.encryptedURLToWorker] = request.encryptedURLToWorker
     }
+    WorkerTask.maxValue(WorkerTask.id) ?: zError("Failed to create")
 }
 
 fun queryWorkerTasks(userId: Long): List<WorkerTaskInfo> = transaction {
@@ -84,17 +102,44 @@ fun queryWorkerTasks(userId: Long): List<WorkerTaskInfo> = transaction {
         }
 }
 
-fun retryWorkerTask(userId: Long, taskId: Long): Long = transaction {
+fun cancelAllTasks(workerId: Long, encryptedPublicKey: String) = transaction {
+    RegisteredWorker.update({ RegisteredWorker.id eq workerId }) {
+        it[RegisteredWorker.encryptedPublicKey] = encryptedPublicKey
+    }
+    WorkerTask.update({WorkerTask.workerId eq workerId}) {
+        it[WorkerTask.status] = WorkerTaskStatus.FAILED
+    }
+}
+
+fun getWorkerTask(userId: Long, taskId: Long): WorkerTaskInfo = transaction {
+    (User innerJoin RegisteredWorker innerJoin WorkerTask).select {
+        (User.id eq userId) and (WorkerTask.id eq taskId)
+    }.assertAuthorized()
+    val result = (RegisteredWorker innerJoin WorkerTask)
+        .select { WorkerTask.id eq taskId }
+        .first()
+    WorkerTaskInfo(
+        id = result[WorkerTask.id],
+        workerId = result[RegisteredWorker.id],
+        workerTitle = result[RegisteredWorker.title],
+        encryptedURL = result[WorkerTask.encryptedURLToUser],
+        status = result[WorkerTask.status]
+    )
+}
+
+fun deleteWorkerTask(userId: Long, taskId: Long) = transaction {
     (User innerJoin RegisteredWorker innerJoin WorkerTask)
         .select {
             (User.id eq userId) and
-                    (WorkerTask.id eq taskId) and
-                    (WorkerTask.status eq WorkerTaskStatus.FAILED)
+                    (WorkerTask.id eq taskId)
         }.assertAuthorized()
-    WorkerTask.update({WorkerTask.id eq taskId}) {
-        it[WorkerTask.status] = WorkerTaskStatus.SUSPENDED
+    if(WorkerTask.select {
+            (WorkerTask.id eq taskId) and
+                    (WorkerTask.status eq WorkerTaskStatus.RUNNING)
+        }.count() != 0) {
+        zError("Task is running.")
     }
-    WorkerTask.select { WorkerTask.id eq taskId }.first()[WorkerTask.workerId]
+    WorkerTask.deleteWhere { WorkerTask.id eq taskId }
 }
 
 fun pollWorkerTask(workerId: Long): WorkerTaskInfo? = transaction {

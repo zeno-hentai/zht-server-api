@@ -92,25 +92,34 @@ fun Route.apiRouting(){
         get("query") {
             call.apiRespond(queryWorkers(call.authorizedUserId))
         }
+        get("get/{workerId}") {
+            val workerId = call["workerId"].toLong()
+            call.apiRespond(getWorker(call.authorizedUserId, workerId))
+        }
         route("task") {
             post("add") {
                 val userId = call.authorizedUserId
                 val request = call.receive<WorkerAddTaskRequest>()
-                addWorkerTask(userId, request)
-                call.apiRespond()
+                if(!WorkerNotificationChannels.exists(request.workerId)) {
+                    zError("Worker is not online.")
+                }
+                call.apiRespond(addWorkerTask(userId, request))
                 notifyWorker(request.workerId)
             }
             get("query") {
                 call.apiRespond(queryWorkerTasks(call.authorizedUserId))
             }
+            get("get/{taskId}") {
+                val taskId = call["taskId"].toLong()
+                call.apiRespond(getWorkerTask(call.authorizedUserId, taskId))
+            }
             delete("poll") {
                 call.apiRespond(PolledWorkerTask(pollWorkerTask(call.getWorkerIdFromToken())))
             }
-            put("retry") {
-                val (taskId) = call.receive<WorkerTaskStatusUpdateRequest>()
-                val workerId = retryWorkerTask(call.authorizedUserId, taskId)
+            delete("delete/{taskId}") {
+                val taskId = call["taskId"].toLong()
+                deleteWorkerTask(call.authorizedUserId, taskId)
                 call.apiRespond()
-                notifyWorker(workerId)
             }
             route("status") {
                 put("success") {
