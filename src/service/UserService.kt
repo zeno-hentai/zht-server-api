@@ -18,6 +18,7 @@ fun createUser(
     username: String,
     password: String,
     publicKey: String,
+    salt: String,
     encryptedPrivateKey: String
 ): Long = transaction {
     User.selectAll().forEach {
@@ -30,6 +31,7 @@ fun createUser(
         it[User.username] = username
         it[User.password] = BCrypt.hashpw(password, ZHTConfig.authSalt)
         it[User.publicKey] = publicKey
+        it[User.salt] = salt
         it[User.encryptedPrivateKey] = encryptedPrivateKey
     }
     User.maxValue(User.id) ?: zError("failed to create user")
@@ -44,6 +46,13 @@ fun authorizeUser(username: String, password: String): Long = transaction {
         zError("Invalid password: $username")
     }
     result[User.id]
+}
+
+fun getSaltByUsername(username: String): String = transaction {
+    val result = User.select {
+        User.username eq username
+    }.firstOrNull() ?: zError("No such user")
+    result[User.salt]
 }
 
 fun getUserIdByAPIToken(token: String): Long? = transaction {

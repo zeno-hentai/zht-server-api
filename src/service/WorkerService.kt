@@ -28,7 +28,6 @@ fun registerWorker(userId: Long, request: WorkerRegisterRequest): Long = transac
     val title = APIToken.select{ APIToken.token eq request.token }.first()[APIToken.title]
     APIToken.deleteWhere { APIToken.token eq request.token }
     RegisteredWorker.insert {
-        it[RegisteredWorker.encryptedPublicKey] = request.encryptedPublicKey
         it[RegisteredWorker.title] = title
         it[RegisteredWorker.token] = request.token
         it[RegisteredWorker.userId] = userId
@@ -42,11 +41,12 @@ fun queryWorkers(userId: Long): List<WorkerInfo> = transaction {
     }
         .orderBy(RegisteredWorker.id, SortOrder.DESC)
         .map {
+            val workerId = it[RegisteredWorker.id]
             WorkerInfo(
-                id = it[RegisteredWorker.id],
+                id = workerId,
                 title = it[RegisteredWorker.title],
-                encryptedPublicKey = it[RegisteredWorker.encryptedPublicKey],
-                online = WorkerNotificationChannels.exists(it[RegisteredWorker.id])
+                encryptedPublicKey = WorkerNotificationChannels.getPublicKey(workerId),
+                online = WorkerNotificationChannels.exists(workerId)
             )
         }
 }
@@ -59,11 +59,12 @@ fun getWorker(userId: Long, workerId: Long): WorkerInfo = transaction {
     val result = RegisteredWorker.select {
         RegisteredWorker.id eq workerId
     }.first()
+    val workerId = result[RegisteredWorker.id]
     WorkerInfo(
-        id = result[RegisteredWorker.id],
+        id = workerId,
         title = result[RegisteredWorker.title],
-        encryptedPublicKey = result[RegisteredWorker.encryptedPublicKey],
-        online = WorkerNotificationChannels.exists(result[RegisteredWorker.id])
+        encryptedPublicKey = WorkerNotificationChannels.getPublicKey(workerId),
+        online = WorkerNotificationChannels.exists(workerId)
     )
 }
 
@@ -102,10 +103,7 @@ fun queryWorkerTasks(userId: Long): List<WorkerTaskInfo> = transaction {
         }
 }
 
-fun cancelAllTasks(workerId: Long, encryptedPublicKey: String) = transaction {
-    RegisteredWorker.update({ RegisteredWorker.id eq workerId }) {
-        it[RegisteredWorker.encryptedPublicKey] = encryptedPublicKey
-    }
+fun cancelAllTasks(workerId: Long) = transaction {
     WorkerTask.update({WorkerTask.workerId eq workerId}) {
         it[WorkerTask.status] = WorkerTaskStatus.FAILED
     }

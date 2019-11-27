@@ -15,8 +15,8 @@ private suspend fun WebSocketServerSession.startWorkerNotification(
     encryptedPublicKey: String
 ) {
     val workerId = getWorkerIdByToken(token) ?: zError("Invalid token")
-    cancelAllTasks(workerId, encryptedPublicKey)
-    val ch = WorkerNotificationChannels.open(workerId)
+    cancelAllTasks(workerId)
+    val ch = WorkerNotificationChannels.open(workerId, encryptedPublicKey)
     outgoing.send(Frame.Text("connected"))
     while(true) {
         ch.next()

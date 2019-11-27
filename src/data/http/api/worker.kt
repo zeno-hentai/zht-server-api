@@ -8,8 +8,7 @@ enum class WorkerTaskStatus {
 }
 
 data class WorkerRegisterRequest(
-    val token: String,
-    val encryptedPublicKey: String
+    val token: String
 )
 
 data class WorkerConnectionRequest (
@@ -31,10 +30,11 @@ data class WorkerAddTaskRequest(
     val encryptedURLToUser: String
 )
 
+
 data class WorkerInfo (
     val id: Long,
     val title: String,
-    val encryptedPublicKey: String,
+    val encryptedPublicKey: String?,
     val online: Boolean
 )
 

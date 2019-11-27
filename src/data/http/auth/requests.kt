@@ -7,6 +7,7 @@ interface MasterKeyRequest {
 data class RegisterRequest(
     val username: String,
     val password: String,
+    val salt: String,
     val publicKey: String,
     val encryptedPrivateKey: String,
     override val masterKey: String
