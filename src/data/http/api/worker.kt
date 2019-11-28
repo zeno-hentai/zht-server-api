@@ -38,6 +38,11 @@ data class WorkerInfo (
     val online: Boolean
 )
 
+data class WorkerInfoWithoutStatus (
+    val id: Long,
+    val title: String
+)
+
 data class WorkerTaskInfo (
     val id: Long,
     val workerId: Long,

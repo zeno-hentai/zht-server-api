@@ -22,6 +22,7 @@ object WorkerNotificationChannels {
     }
 
     class Handler(private val workerId: Long, val encryptedPublicKey: String): Closeable {
+        private var closed = false
         private val channel = Channel<Unit>()
         suspend fun next(){
             channel.receive()
@@ -30,8 +31,11 @@ object WorkerNotificationChannels {
             channel.send(Unit)
         }
         override fun close() {
-            map[workerId]!!.close()
-            map.remove(workerId)
+            if(!closed) {
+                map.remove(workerId)
+                channel.close()
+                closed = true
+            }
         }
     }
 }

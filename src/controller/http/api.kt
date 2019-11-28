@@ -37,6 +37,20 @@ private suspend fun notifyWorker(workerId: Long) {
     WorkerNotificationChannels.send(workerId)
 }
 
+private suspend fun WorkerInfoWithoutStatus.wrap(): WorkerInfo {
+    WorkerNotificationChannels.send(id)
+    return WorkerInfo(
+        id = id,
+        title = title,
+        encryptedPublicKey = WorkerNotificationChannels.getPublicKey(id),
+        online = WorkerNotificationChannels.exists(id)
+    )
+}
+
+private suspend fun List<WorkerInfoWithoutStatus>.wrap(): List<WorkerInfo> {
+    return map { it.wrap() }
+}
+
 fun Route.apiRouting(){
     route("token") {
         post("create") {
@@ -90,11 +104,11 @@ fun Route.apiRouting(){
             call.apiRespond(WorkerRegisterResponse(registerWorker(userId, request)))
         }
         get("query") {
-            call.apiRespond(queryWorkers(call.authorizedUserId))
+            call.apiRespond(queryWorkers(call.authorizedUserId).wrap())
         }
         get("get/{workerId}") {
             val workerId = call["workerId"].toLong()
-            call.apiRespond(getWorker(call.authorizedUserId, workerId))
+            call.apiRespond(getWorker(call.authorizedUserId, workerId).wrap())
         }
         route("task") {
             post("add") {

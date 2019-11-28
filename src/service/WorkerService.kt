@@ -35,23 +35,21 @@ fun registerWorker(userId: Long, request: WorkerRegisterRequest): Long = transac
     RegisteredWorker.maxValue(RegisteredWorker.id) ?: zError("failed")
 }
 
-fun queryWorkers(userId: Long): List<WorkerInfo> = transaction {
+fun queryWorkers(userId: Long): List<WorkerInfoWithoutStatus> = transaction {
     (User innerJoin RegisteredWorker).select {
         User.id eq userId
     }
         .orderBy(RegisteredWorker.id, SortOrder.DESC)
         .map {
             val workerId = it[RegisteredWorker.id]
-            WorkerInfo(
+            WorkerInfoWithoutStatus(
                 id = workerId,
-                title = it[RegisteredWorker.title],
-                encryptedPublicKey = WorkerNotificationChannels.getPublicKey(workerId),
-                online = WorkerNotificationChannels.exists(workerId)
+                title = it[RegisteredWorker.title]
             )
         }
 }
 
-fun getWorker(userId: Long, workerId: Long): WorkerInfo = transaction {
+fun getWorker(userId: Long, workerId: Long): WorkerInfoWithoutStatus = transaction {
     (User innerJoin RegisteredWorker).select {
         (User.id eq userId) and
                 (RegisteredWorker.id eq workerId)
@@ -60,11 +58,9 @@ fun getWorker(userId: Long, workerId: Long): WorkerInfo = transaction {
         RegisteredWorker.id eq workerId
     }.first()
     val workerId = result[RegisteredWorker.id]
-    WorkerInfo(
+    WorkerInfoWithoutStatus(
         id = workerId,
-        title = result[RegisteredWorker.title],
-        encryptedPublicKey = WorkerNotificationChannels.getPublicKey(workerId),
-        online = WorkerNotificationChannels.exists(workerId)
+        title = result[RegisteredWorker.title]
     )
 }
 
