@@ -42,6 +42,7 @@ fun addItemIndexRecord(
         this[ItemTag.itemId] = itemId
         this[ItemTag.encryptedTag] = tag
     }
+    updateLatestUpdateTime(itemId)
     itemId
 }
 
@@ -52,6 +53,7 @@ fun updateItemEncryptedMeta(userId: Long, itemId: Long, encryptedMeta: String) =
     ItemIndex.update({ ItemIndex.id eq itemId }) {
         it[ItemIndex.encryptedMeta] = encryptedMeta
     }
+    updateLatestUpdateTime(itemId)
 }
 
 fun addFileLinkToItemIndex(
@@ -70,6 +72,7 @@ fun addFileLinkToItemIndex(
         it[FileLink.mappedName] = mappedFileName
     }
     uploadCallback()
+    updateLatestUpdateTime(itemId)
 }
 
 fun deleteFileLinkFromItemIndex(
@@ -87,4 +90,5 @@ fun deleteFileLinkFromItemIndex(
     }
     FileLink.deleteWhere { FileLink.mappedName eq mappedFileName }
     deleteCallback()
+    updateLatestUpdateTime(itemId)
 }

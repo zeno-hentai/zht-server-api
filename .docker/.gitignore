@@ -3,3 +3,4 @@ config/*.properties
 !config/*.example.properties
 postgres-data/
 mariadb-data/
+data/

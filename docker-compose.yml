@@ -13,22 +13,8 @@ services:
     volumes:
       - '.:/project'
     environment:
-      ZHT_CONFIG: .docker/config/config.properties
-    links:
-      - db
-    depends_on:
-      - db
+      ZHT_CONFIG: .docker/config/test.properties
+    ports:
+      - '8080:8080'
     command: [sh, './.docker/scripts/launch.sh']
-  db:
-    image: postgres:12-alpine
-    restart: always
-    environment:
-      POSTGRES_USER: zht
-      POSTGRES_PASSWORD: secret
-      POSTGRES_DB: zht
-#      PGUSER: zht
-#      PGPASSWORD: secret
-#      PGDATABASE: zht
-      PGDATA: /data
-    volumes:
-      - '.docker/postgres-data:/data'
+
