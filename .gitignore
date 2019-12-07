@@ -6,3 +6,4 @@
 *.ipr
 *.iws
 *.sqlite
+.DS_Store
